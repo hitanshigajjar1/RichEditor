@@ -64,7 +64,7 @@ dependencyResolutionManagement {
 
 ```kotlin
 dependencies {
-    implementation("com.github.YourUsername:RichEditor:1.0.0")
+	        implementation("com.github.Excelsior-Technologies-Community:RichEditor:1.0.0")
 }
 ```
 

@@ -187,6 +187,78 @@ private fun insertImage() {
 
 ## ⚙️ Customization
 
+### Toolbar Appearance - XML Attributes
+
+The `RichEditorToolbar` supports extensive customization through XML attributes or programmatic configuration:
+
+#### 📋 Available Attributes
+
+| Attribute | Type | Description | Default Value |
+|-----------|------|-------------|---------------|
+| `app:iconSize` | dimension | Size of the icon within each button | `24dp` |
+| `app:buttonSize` | dimension | Overall button width and height | `40dp` |
+| `app:buttonPadding` | dimension | Internal padding inside each button | `8dp` |
+| `app:buttonSpacing` | dimension | Horizontal spacing between buttons | `4dp` |
+| `app:activeColor` | color | Icon color when formatting is active | `#2196F3` (Blue) |
+| `app:inactiveColor` | color | Icon color in default/inactive state | `#757575` (Gray) |
+| `app:toolbarBackgroundColor` | color | Background color of the entire toolbar | `Transparent` |
+| `app:toolbarPaddingHorizontal` | dimension | Left and right padding of toolbar | `8dp` |
+| `app:toolbarPaddingVertical` | dimension | Top and bottom padding of toolbar | `4dp` |
+| `app:enableRipple` | boolean | Enable/disable Material ripple effect | `true` |
+| `app:buttonCornerRadius` | dimension | Corner radius for button backgrounds | `4dp` |
+
+#### Example: Customized Toolbar in XML
+
+```xml
+<com.ext.rich_editor.RichEditorToolbar
+    android:id="@+id/richEditorToolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:elevation="2dp"
+    app:iconSize="22dp"
+    app:buttonSize="44dp"
+    app:buttonPadding="10dp"
+    app:buttonSpacing="6dp"
+    app:activeColor="#FF6B35"
+    app:inactiveColor="#666666"
+    app:toolbarBackgroundColor="#F5F5F5"
+    app:toolbarPaddingHorizontal="12dp"
+    app:toolbarPaddingVertical="8dp"
+    app:enableRipple="true"
+    app:buttonCornerRadius="8dp" />
+```
+
+#### Example: Programmatic Customization
+
+```kotlin
+// Customize toolbar appearance programmatically
+toolbar.apply {
+    // Icon and button sizes
+    iconSize = dpToPx(22)        // Icon size within button
+    buttonSize = dpToPx(44)      // Overall button size
+    buttonPadding = dpToPx(10)   // Padding inside button
+    buttonSpacing = dpToPx(6)    // Space between buttons
+    
+    // Colors
+    activeColor = Color.parseColor("#FF6B35")      // Orange active color
+    inactiveColor = Color.parseColor("#666666")    // Gray inactive color
+    toolbarBackgroundColor = Color.parseColor("#F5F5F5")  // Light gray background
+    
+    // Toolbar padding
+    toolbarPaddingHorizontal = dpToPx(12)
+    toolbarPaddingVertical = dpToPx(8)
+    
+    // Ripple effect and corner radius
+    enableRipple = true
+    buttonCornerRadius = dpToPx(8)
+}
+
+// Helper function to convert dp to pixels
+private fun dpToPx(dp: Int): Int {
+    return (dp * resources.displayMetrics.density).toInt()
+}
+```
+
 ### Custom Toolbar Actions
 
 ```kotlin

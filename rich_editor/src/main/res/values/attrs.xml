@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RichEditorToolbar">
+        <!-- Icon size within the button -->
+        <attr name="iconSize" format="dimension" />
+
+        <!-- Overall button size (width and height) -->
+        <attr name="buttonSize" format="dimension" />
+
+        <!-- Padding inside the button -->
+        <attr name="buttonPadding" format="dimension" />
+
+        <!-- Spacing between buttons -->
+        <attr name="buttonSpacing" format="dimension" />
+
+        <!-- Active icon color (when formatting is applied) -->
+        <attr name="activeColor" format="color" />
+
+        <!-- Inactive icon color (default state) -->
+        <attr name="inactiveColor" format="color" />
+
+        <!-- Toolbar background color -->
+        <attr name="toolbarBackgroundColor" format="color" />
+
+        <!-- Horizontal padding for toolbar -->
+        <attr name="toolbarPaddingHorizontal" format="dimension" />
+
+        <!-- Vertical padding for toolbar -->
+        <attr name="toolbarPaddingVertical" format="dimension" />
+
+        <!-- Enable ripple effect on buttons -->
+        <attr name="enableRipple" format="boolean" />
+
+        <!-- Corner radius for button background -->
+        <attr name="buttonCornerRadius" format="dimension" />
+    </declare-styleable>
+</resources>

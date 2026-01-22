@@ -317,7 +317,7 @@ class RichEditor @JvmOverloads constructor(
         }
     }
 
-    private fun executeJavaScript(script: String) {
+    internal fun executeJavaScript(script: String) {
         if (isReady) {
             evaluateJavascript("javascript:$script", null)
         } else {

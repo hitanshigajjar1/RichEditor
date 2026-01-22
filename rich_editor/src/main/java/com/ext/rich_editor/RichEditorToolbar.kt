@@ -8,7 +8,6 @@ import android.view.Gravity
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.core.content.ContextCompat
 
 class RichEditorToolbar @JvmOverloads constructor(
     context: Context,
@@ -50,12 +49,99 @@ class RichEditorToolbar @JvmOverloads constructor(
         ORDERED_LIST(R.drawable.ic_list_numbered)
     }
 
-    private val toolbarLayout: LinearLayout
+    private lateinit var toolbarLayout: LinearLayout
     private var editor: RichEditor? = null
     private val actionButtons = mutableMapOf<EditorAction, ImageView>()
 
-    private val activeColor = Color.parseColor("#2196F3")
-    private val inactiveColor = Color.parseColor("#757575")
+    // Customizable attributes - using backing fields to prevent premature refresh
+    private var _iconSize: Int = dpToPx(24)
+    private var _buttonSize: Int = dpToPx(40)
+    private var _buttonPadding: Int = dpToPx(8)
+    private var _buttonSpacing: Int = dpToPx(4)
+    private var _activeColor: Int = Color.parseColor("#2196F3")
+    private var _inactiveColor: Int = Color.parseColor("#757575")
+    private var _toolbarBackgroundColor: Int = Color.TRANSPARENT
+    private var _toolbarPaddingHorizontal: Int = dpToPx(8)
+    private var _toolbarPaddingVertical: Int = dpToPx(4)
+    private var _enableRipple: Boolean = true
+    private var _buttonCornerRadius: Int = dpToPx(4)
+
+    var iconSize: Int
+        get() = _iconSize
+        set(value) {
+            _iconSize = value
+            if (::toolbarLayout.isInitialized) refreshButtonSizes()
+        }
+
+    var buttonSize: Int
+        get() = _buttonSize
+        set(value) {
+            _buttonSize = value
+            if (::toolbarLayout.isInitialized) refreshButtonSizes()
+        }
+
+    var buttonPadding: Int
+        get() = _buttonPadding
+        set(value) {
+            _buttonPadding = value
+            if (::toolbarLayout.isInitialized) refreshButtonPadding()
+        }
+
+    var buttonSpacing: Int
+        get() = _buttonSpacing
+        set(value) {
+            _buttonSpacing = value
+            if (::toolbarLayout.isInitialized) refreshButtonSpacing()
+        }
+
+    var activeColor: Int
+        get() = _activeColor
+        set(value) {
+            _activeColor = value
+            if (::toolbarLayout.isInitialized) refreshButtonStates()
+        }
+
+    var inactiveColor: Int
+        get() = _inactiveColor
+        set(value) {
+            _inactiveColor = value
+            if (::toolbarLayout.isInitialized) refreshButtonStates()
+        }
+
+    var toolbarBackgroundColor: Int
+        get() = _toolbarBackgroundColor
+        set(value) {
+            _toolbarBackgroundColor = value
+            if (::toolbarLayout.isInitialized) toolbarLayout.setBackgroundColor(value)
+        }
+
+    var toolbarPaddingHorizontal: Int
+        get() = _toolbarPaddingHorizontal
+        set(value) {
+            _toolbarPaddingHorizontal = value
+            if (::toolbarLayout.isInitialized) refreshToolbarPadding()
+        }
+
+    var toolbarPaddingVertical: Int
+        get() = _toolbarPaddingVertical
+        set(value) {
+            _toolbarPaddingVertical = value
+            if (::toolbarLayout.isInitialized) refreshToolbarPadding()
+        }
+
+    var enableRipple: Boolean
+        get() = _enableRipple
+        set(value) {
+            _enableRipple = value
+            if (::toolbarLayout.isInitialized) refreshButtonBackgrounds()
+        }
+
+    var buttonCornerRadius: Int
+        get() = _buttonCornerRadius
+        set(value) {
+            _buttonCornerRadius = value
+            if (::toolbarLayout.isInitialized) refreshButtonBackgrounds()
+        }
 
     private val defaultActions = listOf(
         EditorAction.BOLD, EditorAction.ITALIC, EditorAction.UNDERLINE,
@@ -67,11 +153,36 @@ class RichEditorToolbar @JvmOverloads constructor(
     )
 
     init {
+        // Read custom attributes BEFORE initializing layout
+        context.theme.obtainStyledAttributes(
+            attrs,
+            R.styleable.RichEditorToolbar,
+            0, 0
+        ).apply {
+            try {
+                _iconSize = getDimensionPixelSize(R.styleable.RichEditorToolbar_iconSize, dpToPx(24))
+                _buttonSize = getDimensionPixelSize(R.styleable.RichEditorToolbar_buttonSize, dpToPx(40))
+                _buttonPadding = getDimensionPixelSize(R.styleable.RichEditorToolbar_buttonPadding, dpToPx(8))
+                _buttonSpacing = getDimensionPixelSize(R.styleable.RichEditorToolbar_buttonSpacing, dpToPx(4))
+                _activeColor = getColor(R.styleable.RichEditorToolbar_activeColor, Color.parseColor("#2196F3"))
+                _inactiveColor = getColor(R.styleable.RichEditorToolbar_inactiveColor, Color.parseColor("#757575"))
+                _toolbarBackgroundColor = getColor(R.styleable.RichEditorToolbar_toolbarBackgroundColor, Color.TRANSPARENT)
+                _toolbarPaddingHorizontal = getDimensionPixelSize(R.styleable.RichEditorToolbar_toolbarPaddingHorizontal, dpToPx(8))
+                _toolbarPaddingVertical = getDimensionPixelSize(R.styleable.RichEditorToolbar_toolbarPaddingVertical, dpToPx(4))
+                _enableRipple = getBoolean(R.styleable.RichEditorToolbar_enableRipple, true)
+                _buttonCornerRadius = getDimensionPixelSize(R.styleable.RichEditorToolbar_buttonCornerRadius, dpToPx(4))
+            } finally {
+                recycle()
+            }
+        }
+
+        // NOW initialize the layout with the values from attributes
         isHorizontalScrollBarEnabled = false
         toolbarLayout = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setPadding(dpToPx(8), dpToPx(4), dpToPx(8), dpToPx(4))
+            setBackgroundColor(_toolbarBackgroundColor)
+            setPadding(_toolbarPaddingHorizontal, _toolbarPaddingVertical, _toolbarPaddingHorizontal, _toolbarPaddingVertical)
         }
         addView(toolbarLayout)
         setupDefaultActions()
@@ -113,18 +224,22 @@ class RichEditorToolbar @JvmOverloads constructor(
 
     private fun createActionButton(action: EditorAction): ImageView {
         return ImageView(context).apply {
-            val size = dpToPx(40)
-            layoutParams = LinearLayout.LayoutParams(size, size).apply {
-                marginEnd = dpToPx(4)
+            layoutParams = LinearLayout.LayoutParams(_buttonSize, _buttonSize).apply {
+                marginEnd = _buttonSpacing
             }
 
-            background = createRippleDrawable()
+            background = createButtonBackground()
             scaleType = ImageView.ScaleType.CENTER_INSIDE
-            setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
+            setPadding(_buttonPadding, _buttonPadding, _buttonPadding, _buttonPadding)
 
             // Set icon
             setImageResource(action.iconRes)
-            setColorFilter(inactiveColor, PorterDuff.Mode.SRC_IN)
+            setColorFilter(_inactiveColor, PorterDuff.Mode.SRC_IN)
+
+            // Set icon size by adjusting the image
+            adjustViewBounds = true
+            maxWidth = _iconSize
+            maxHeight = _iconSize
 
             contentDescription = getContentDescription(action)
 
@@ -132,6 +247,26 @@ class RichEditorToolbar @JvmOverloads constructor(
                 handleActionClick(action)
             }
         }
+    }
+
+    private fun createButtonBackground(): android.graphics.drawable.Drawable {
+        if (_enableRipple) {
+            val attrs = intArrayOf(android.R.attr.selectableItemBackgroundBorderless)
+            val ta = context.obtainStyledAttributes(attrs)
+            val drawable = ta.getDrawable(0)
+            ta.recycle()
+            return drawable ?: android.graphics.drawable.ColorDrawable(Color.TRANSPARENT)
+        } else {
+            return createRoundedBackground()
+        }
+    }
+
+    private fun createRoundedBackground(): android.graphics.drawable.Drawable {
+        val shape = android.graphics.drawable.GradientDrawable()
+        shape.shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+        shape.cornerRadius = _buttonCornerRadius.toFloat()
+        shape.setColor(Color.TRANSPARENT)
+        return shape
     }
 
     private fun getContentDescription(action: EditorAction): String {
@@ -209,14 +344,6 @@ class RichEditorToolbar @JvmOverloads constructor(
         postDelayed({ editor?.focusEditor() }, 100)
     }
 
-    private fun createRippleDrawable(): android.graphics.drawable.Drawable {
-        val attrs = intArrayOf(android.R.attr.selectableItemBackgroundBorderless)
-        val ta = context.obtainStyledAttributes(attrs)
-        val drawable = ta.getDrawable(0)
-        ta.recycle()
-        return drawable ?: android.graphics.drawable.ColorDrawable(Color.TRANSPARENT)
-    }
-
     private fun dpToPx(dp: Int): Int {
         return (dp * context.resources.displayMetrics.density).toInt()
     }
@@ -249,9 +376,67 @@ class RichEditorToolbar @JvmOverloads constructor(
             }
 
             button.setColorFilter(
-                if (isActive) activeColor else inactiveColor,
+                if (isActive) _activeColor else _inactiveColor,
                 PorterDuff.Mode.SRC_IN
             )
+        }
+    }
+
+    // Refresh methods for dynamic updates
+    private fun refreshButtonSizes() {
+        actionButtons.values.forEach { button ->
+            (button.layoutParams as? LinearLayout.LayoutParams)?.apply {
+                width = _buttonSize
+                height = _buttonSize
+            }
+            button.maxWidth = _iconSize
+            button.maxHeight = _iconSize
+            button.requestLayout()
+        }
+    }
+
+    private fun refreshButtonPadding() {
+        actionButtons.values.forEach { button ->
+            button.setPadding(_buttonPadding, _buttonPadding, _buttonPadding, _buttonPadding)
+        }
+    }
+
+    private fun refreshButtonSpacing() {
+        actionButtons.values.forEach { button ->
+            (button.layoutParams as? LinearLayout.LayoutParams)?.marginEnd = _buttonSpacing
+        }
+        toolbarLayout.requestLayout()
+    }
+
+    private fun refreshButtonStates() {
+        // Refresh colors on all buttons
+        actionButtons.forEach { (_, button) ->
+            // Keep current color filter, just update the available colors
+            val currentFilter = button.colorFilter
+            if (currentFilter != null) {
+                // Re-apply current state
+                post {
+                    editor?.let {
+                        // Trigger a selection change update
+                        updateButtonStates(emptyList())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun refreshToolbarPadding() {
+        toolbarLayout.setPadding(
+            _toolbarPaddingHorizontal,
+            _toolbarPaddingVertical,
+            _toolbarPaddingHorizontal,
+            _toolbarPaddingVertical
+        )
+    }
+
+    private fun refreshButtonBackgrounds() {
+        actionButtons.values.forEach { button ->
+            button.background = createButtonBackground()
         }
     }
 

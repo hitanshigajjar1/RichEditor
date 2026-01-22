@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupEditor()
+        customizeToolbar()
     }
 
     private fun setupEditor() {
@@ -124,6 +125,38 @@ class MainActivity : AppCompatActivity() {
         editor.postDelayed({
             editor.focusEditor()
         }, 500)
+    }
+
+    private fun customizeToolbar() {
+        // Programmatically customize toolbar appearance
+        // You can also set these in XML layout
+
+        // Icon and button sizes
+        toolbar.iconSize = dpToPx(22)  // Icon size within button
+        toolbar.buttonSize = dpToPx(44)  // Overall button size
+        toolbar.buttonPadding = dpToPx(10)  // Padding inside button
+        toolbar.buttonSpacing = dpToPx(6)  // Space between buttons
+
+        // Colors
+        toolbar.activeColor = Color.parseColor("#FF6B35")  // Orange active color
+        toolbar.inactiveColor = Color.parseColor("#666666")  // Gray inactive color
+        toolbar.toolbarBackgroundColor = Color.parseColor("#F5F5F5")  // Light gray background
+
+        // Toolbar padding
+        toolbar.toolbarPaddingHorizontal = dpToPx(12)
+        toolbar.toolbarPaddingVertical = dpToPx(8)
+
+        // Ripple effect and corner radius
+        toolbar.enableRipple = true
+        toolbar.buttonCornerRadius = dpToPx(8)
+
+        // Example: Add custom actions or remove some
+        // toolbar.removeAction(RichEditorToolbar.EditorAction.SUBSCRIPT)
+        // toolbar.addAction(RichEditorToolbar.EditorAction.INSERT_VIDEO, 0)
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -279,8 +312,6 @@ class MainActivity : AppCompatActivity() {
                 if (url.isNotEmpty()) {
                     editor.insertLink(url, text)
                     editor.focusEditor()
-                } else {
-//                    Toast.makeText(this, "URL cannot be empty", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("Cancel") { _, _ ->

@@ -23,12 +23,24 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+    <!-- Rich Editor Toolbar with Custom Attributes -->
     <com.ext.rich_editor.RichEditorToolbar
         android:id="@+id/richEditorToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
-        android:elevation="2dp" />
+        android:background="#F5F5F5"
+        android:elevation="2dp"
+        app:iconSize="24dp"
+        app:buttonSize="44dp"
+        app:buttonPadding="10dp"
+        app:buttonSpacing="6dp"
+        app:activeColor="#2196F3"
+        app:inactiveColor="#757575"
+        app:toolbarBackgroundColor="#F5F5F5"
+        app:toolbarPaddingHorizontal="12dp"
+        app:toolbarPaddingVertical="8dp"
+        app:enableRipple="true"
+      />
 
     <View
         android:layout_width="match_parent"
